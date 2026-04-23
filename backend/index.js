@@ -1,8 +1,11 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
+
 
 const expenseRoutes = require("./routes/expenseRoutes");
 
+app.use(cors());
 app.use(express.json());
 
 // IMPORTANT LINE

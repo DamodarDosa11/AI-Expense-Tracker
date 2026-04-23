@@ -1,9 +1,7 @@
-import { defineConfig, type UserConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const config: UserConfig = {
+export default defineConfig({
   plugins: [react(), tailwindcss()],
-}
-
-export default defineConfig(config)
+})
