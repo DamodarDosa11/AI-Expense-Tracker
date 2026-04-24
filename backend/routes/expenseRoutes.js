@@ -5,12 +5,14 @@ const {
   getExpenses,
   addExpense,
   deleteExpense,
-  updateExpense
+  updateExpense,
 } = require("../controllers/expenseController");
 
 router.get("/expenses", getExpenses);
 router.post("/expenses", addExpense);
 router.delete("/expenses/:id", deleteExpense);
+
+// 🔥 IMPORTANT: must include :id
 router.put("/expenses/:id", updateExpense);
 
 module.exports = router;

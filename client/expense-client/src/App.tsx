@@ -8,40 +8,53 @@ import {
 } from "./api/expenseApi";
 
 function App() {
+  // ✅ MAIN STATE
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
+  // ✅ FORM STATE (FIXED)
   const [title, setTitle] = useState("");
-
-  // 🔥 FIX: must use useState (not plain string)
-  const [amount, setAmount] = useState("");
-
+  const [amount, setAmount] = useState(""); // FIXED
   const [category, setCategory] = useState("");
 
+  // ✅ EDIT STATE (FIXED)
   const [editId, setEditId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [editAmount, setEditAmount] = useState("");
-  const [editCategory, setEditCategory] = useState("");
+  const [editAmount, setEditAmount] = useState(""); // FIXED
+  const [editCategory, setEditCategory] = useState(""); // FIXED
+
+  // ✅ UX STATE
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  // ✅ FETCH DATA
   const fetchData = async () => {
-    const data = await getExpenses();
-    setExpenses(data);
+    try {
+      setLoading(true);
+      setError("");
+
+      const data = await getExpenses();
+      setExpenses(data);
+    } catch (err) {
+      setError("Failed to load expenses");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // 🔥 ADD EXPENSE
+  // ✅ ADD
   const handleAdd = async () => {
     if (!title || !amount) return;
 
     await addExpense({
       title,
-      amount: Number(amount), // convert string → number
+      amount: Number(amount),
       category,
     });
 
-    // 🔥 reset fields
     setTitle("");
     setAmount("");
     setCategory("");
@@ -49,13 +62,13 @@ function App() {
     fetchData();
   };
 
-  // 🔥 DELETE
+  // ✅ DELETE
   const handleDelete = async (id: number) => {
     await deleteExpense(id);
     fetchData();
   };
 
-  // 🔥 START EDIT
+  // ✅ START EDIT
   const startEdit = (exp: Expense) => {
     setEditId(exp.id!);
     setEditTitle(exp.title);
@@ -63,7 +76,7 @@ function App() {
     setEditCategory(exp.category || "");
   };
 
-  // 🔥 UPDATE
+  // ✅ UPDATE
   const handleUpdate = async () => {
     if (!editId) return;
 
@@ -73,7 +86,6 @@ function App() {
       category: editCategory,
     });
 
-    // reset edit state
     setEditId(null);
     setEditTitle("");
     setEditAmount("");
@@ -82,103 +94,150 @@ function App() {
     fetchData();
   };
 
+  // ✅ SUMMARY
+  const total = expenses.reduce(
+    (sum, exp) => sum + Number(exp.amount),
+    0
+  );
+
   return (
-    <div className="p-6 text-white bg-gray-900 min-h-screen">
-      <h1 className="text-2xl mb-4 font-bold">Expense Tracker</h1>
+    <div className="min-h-screen bg-slate-900 text-white flex justify-center py-10 px-4">
+      <div className="w-full max-w-2xl">
 
-      {/* 🔥 ADD FORM */}
-      <div className="flex gap-2 mb-4 flex-wrap">
-        <input
-          className="p-2 text-white"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+        {/* HEADER */}
+        <h1 className="text-4xl font-bold text-center mb-8">
+          💸 Expense Tracker
+        </h1>
 
-        <input
-          className="p-2 text-white"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
+        {/* SUMMARY */}
+        <div className="bg-slate-800 border border-slate-700 p-4 rounded-xl mb-6 text-center">
+          <p className="text-slate-400">Total Spending</p>
+          <p className="text-2xl font-bold text-emerald-400">
+            ₹{total}
+          </p>
+        </div>
 
-        {/* 🔥 CATEGORY INPUT */}
-        <input
-          className="p-2 text-white"
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
+        {/* FORM */}
+        <div className="bg-slate-800 border border-slate-700 p-5 rounded-xl mb-8">
+          <div className="grid sm:grid-cols-3 gap-3">
 
-        <button onClick={handleAdd} className="bg-blue-500 px-4">
-          Add
-        </button>
-      </div>
+            <input
+              className="p-3 rounded-lg bg-slate-100 text-black"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
 
-      {/* 🔥 EXPENSE LIST */}
-      <ul>
-        {expenses.map((exp) => (
-          <li
-            key={exp.id}
-            className="border-b py-2 flex justify-between items-center"
+            <input
+              className="p-3 rounded-lg bg-slate-100 text-black"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+
+            <input
+              className="p-3 rounded-lg bg-slate-100 text-black"
+              placeholder="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={handleAdd}
+            className="mt-4 w-full bg-blue-500 py-3 rounded-lg hover:bg-blue-600"
           >
-            {editId === exp.id ? (
-              <>
-                {/* 🔥 EDIT MODE */}
-                <div className="flex gap-2 flex-wrap">
+            Add Expense
+          </button>
+        </div>
+
+        {/* LOADING */}
+        {loading && (
+          <p className="text-center text-blue-400">Loading...</p>
+        )}
+
+        {/* ERROR */}
+        {error && (
+          <p className="text-center text-red-400">{error}</p>
+        )}
+
+        {/* EMPTY */}
+        {!loading && expenses.length === 0 && (
+          <p className="text-center text-slate-400">
+            No expenses yet 🚀
+          </p>
+        )}
+
+        {/* LIST */}
+        <div className="space-y-4 mt-4">
+          {expenses.map((exp) => (
+            <div
+              key={exp.id}
+              className="bg-slate-800 border border-slate-700 p-4 rounded-xl"
+            >
+              {editId === exp.id ? (
+                <div className="space-y-2">
+
                   <input
-                    className="p-1 text-white"
+                    className="w-full p-2 rounded text-black"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                   />
 
                   <input
-                    className="p-1 text-white"
+                    className="w-full p-2 rounded text-black"
                     value={editAmount}
                     onChange={(e) => setEditAmount(e.target.value)}
                   />
 
                   <input
-                    className="p-1 text-white"
+                    className="w-full p-2 rounded text-black"
                     value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
+                    onChange={(e) =>
+                      setEditCategory(e.target.value)
+                    }
                   />
-                </div>
-
-                <button
-                  onClick={handleUpdate}
-                  className="bg-green-500 px-3 py-1 rounded"
-                >
-                  Save
-                </button>
-              </>
-            ) : (
-              <>
-                {/* 🔥 DISPLAY MODE */}
-                <span>
-                  {exp.title} - ₹{exp.amount} ({exp.category})
-                </span>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => startEdit(exp)}
-                    className="bg-yellow-500 px-3 py-1 rounded"
-                  >
-                    Edit
-                  </button>
 
                   <button
-                    onClick={() => handleDelete(exp.id!)}
-                    className="bg-red-500 px-3 py-1 rounded"
+                    onClick={handleUpdate}
+                    className="bg-emerald-500 w-full py-2 rounded hover:bg-emerald-600"
                   >
-                    Delete
+                    Save
                   </button>
                 </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+              ) : (
+                <div className="flex justify-between items-center">
+
+                  <div>
+                    <p className="font-semibold">{exp.title}</p>
+                    <p className="text-sm text-slate-400">
+                      ₹{exp.amount} • {exp.category}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startEdit(exp)}
+                      className="bg-amber-500 px-3 py-1 rounded hover:bg-amber-600"
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(exp.id!)}
+                      className="bg-rose-500 px-3 py-1 rounded hover:bg-rose-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+      </div>
     </div>
   );
 }

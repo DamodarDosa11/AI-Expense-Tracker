@@ -1,16 +1,25 @@
+require("dotenv").config();
+
 const express = require("express");
-const app = express();
 const cors = require("cors");
+const app = express();
 
-
-const expenseRoutes = require("./routes/expenseRoutes");
-
+// 🔥 Middleware
 app.use(cors());
 app.use(express.json());
 
-// IMPORTANT LINE
+// 🔥 Routes
+const expenseRoutes = require("./routes/expenseRoutes");
 app.use("/", expenseRoutes);
 
-app.listen(4001, () => {
-  console.log("Server is Running on port 4001");
+// 🔥 Health check (important for deployment)
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
+// 🔥 PORT (Render requires this)
+const PORT = process.env.PORT || 4001;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

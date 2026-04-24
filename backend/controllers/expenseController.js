@@ -1,65 +1,40 @@
 const pool = require("../db");
 
-// GET
+// GET all expenses
 const getExpenses = async (req, res) => {
-  console.log("GET HIT");
-
   try {
-    console.log("Before DB");
-
     const result = await pool.query(
       "SELECT * FROM expenses ORDER BY created_at DESC"
     );
-
-    console.log("After DB");
-
     res.json(result.rows);
-  } catch (err) {
-    console.error("ERROR:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-// POST
-const addExpense = async (req, res) => {
-  try {
-    const data = req.body;
-
-    // Convert single object → array
-    const expensesArray = Array.isArray(data) ? data : [data];
-
-    // Validation
-    for (let exp of expensesArray) {
-      if (!exp.title || !exp.amount) {
-        return res.status(400).json({ error: "Invalid data in array" });
-      }
-    }
-
-    // Build dynamic query
-    const values = [];
-    const placeholders = expensesArray.map((exp, index) => {
-      const baseIndex = index * 3;
-      values.push(exp.title, exp.amount, exp.category || null);
-      return `($${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3})`;
-    });
-
-    const query = `
-      INSERT INTO expenses (title, amount, category)
-      VALUES ${placeholders.join(", ")}
-      RETURNING *
-    `;
-
-    const result = await pool.query(query, values);
-
-    res.status(201).json(result.rows);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };
 
-// DELETE
+// ADD expense
+const addExpense = async (req, res) => {
+  try {
+    const { title, amount, category } = req.body;
+
+    if (!title || !amount) {
+      return res.status(400).json({ error: "Title and amount required" });
+    }
+
+    const result = await pool.query(
+      "INSERT INTO expenses (title, amount, category) VALUES ($1, $2, $3) RETURNING *",
+      [title, amount, category || null]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// DELETE expense
 const deleteExpense = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -75,7 +50,7 @@ const deleteExpense = async (req, res) => {
 
     res.json({
       message: "Deleted",
-      deleted: result.rows[0]
+      deleted: result.rows[0],
     });
   } catch (err) {
     console.error(err);
@@ -83,26 +58,34 @@ const deleteExpense = async (req, res) => {
   }
 };
 
-// PUT
+// 🔥 UPDATE expense (FULL FIX WITH CATEGORY)
 const updateExpense = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { title, amount } = req.body;
+
+    // 🔥 IMPORTANT: include category
+    const { title, amount, category } = req.body;
+
+    console.log("UPDATE BODY:", req.body); // debug
 
     const result = await pool.query(
       `UPDATE expenses
        SET title = COALESCE($1, title),
-           amount = COALESCE($2, amount)
-       WHERE id = $3
+           amount = COALESCE($2, amount),
+           category = COALESCE($3, category)
+       WHERE id = $4
        RETURNING *`,
-      [title || null, amount || null, id]
+      [title || null, amount || null, category || null, id]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Expense not found" });
     }
 
-    res.json(result.rows[0]);
+    res.json({
+      message: "Expense updated",
+      updated: result.rows[0],
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -113,5 +96,5 @@ module.exports = {
   getExpenses,
   addExpense,
   deleteExpense,
-  updateExpense
+  updateExpense,
 };
