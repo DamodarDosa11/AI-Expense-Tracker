@@ -1,4 +1,4 @@
-const BASE_URL = "https://YOUR-BACKEND-URL.onrender.com"; // 🔥 replace with your real backend
+const BASE_URL = "https://YOUR-RENDER-BACKEND.onrender.com"; // 🔥 your real backend URL
 
 export const getExpenses = async () => {
   const res = await fetch(`${BASE_URL}/expenses`);
