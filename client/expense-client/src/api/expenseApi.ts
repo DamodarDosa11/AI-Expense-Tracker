@@ -1,6 +1,6 @@
 import type { Expense } from "../types/Expense";
 
-const BASE_URL = "http://localhost:4001";
+const BASE_URL = "https://YOUR-BACKEND-URL.onrender.com";
 
 export const getExpenses = async (): Promise<Expense[]> => {
   const res = await fetch(`${BASE_URL}/expenses`);
