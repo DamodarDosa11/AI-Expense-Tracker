@@ -1,13 +1,11 @@
-import type { Expense } from "../types/Expense";
+const BASE_URL = "https://YOUR-BACKEND-URL.onrender.com"; // 🔥 replace with your real backend
 
-const BASE_URL = "https://YOUR-BACKEND-URL.onrender.com";
-
-export const getExpenses = async (): Promise<Expense[]> => {
+export const getExpenses = async () => {
   const res = await fetch(`${BASE_URL}/expenses`);
   return res.json();
 };
 
-export const addExpense = async (data: Expense) => {
+export const addExpense = async (data: any) => {
   const res = await fetch(`${BASE_URL}/expenses`, {
     method: "POST",
     headers: {
@@ -25,7 +23,7 @@ export const deleteExpense = async (id: number) => {
   return res.json();
 };
 
-export const updateExpense = async (id: number, data: Partial<Expense>) => {
+export const updateExpense = async (id: number, data: any) => {
   const res = await fetch(`${BASE_URL}/expenses/${id}`, {
     method: "PUT",
     headers: {
