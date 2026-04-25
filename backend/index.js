@@ -3,13 +3,12 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 
-// ✅ GLOBAL HEADERS (handles ALL CORS + preflight)
+// ✅ GLOBAL CORS + PREFLIGHT (FINAL)
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
 
-  // 🔥 HANDLE PREFLIGHT REQUESTS
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -23,14 +22,10 @@ app.use(express.json());
 const expenseRoutes = require("./routes/expenseRoutes");
 app.use("/", expenseRoutes);
 
-// ✅ Health check
+// ✅ Health
 app.get("/", (req, res) => {
-  res.send("API is running 🚀");
+  res.send("API running 🚀");
 });
 
-// ✅ Port
 const PORT = process.env.PORT || 4001;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server on ${PORT}`));
