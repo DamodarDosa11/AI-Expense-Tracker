@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-
 import {
   getExpenses,
   addExpense,
   deleteExpense,
   updateExpense,
 } from "./api/expenseApi";
-
 import type { Expense } from "./api/expenseApi";
+
+// 🔥 Icons
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const App: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -16,36 +17,47 @@ const App: React.FC = () => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [editId, setEditId] = useState<number | null>(null);
 
+  // 🔹 Fetch expenses
   const fetchExpenses = async () => {
-    const data = await getExpenses();
-    setExpenses(data);
+    try {
+      const data = await getExpenses();
+      setExpenses(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
     fetchExpenses();
   }, []);
 
+  // 🔹 Add / Update
   const handleSubmit = async () => {
     if (!title || !amount || !category) return;
 
-    if (editId !== null) {
-      await updateExpense(editId, {
-        title,
-        amount: Number(amount),
-        category,
-      });
-    } else {
-      await addExpense({
-        title,
-        amount: Number(amount),
-        category,
-      });
-    }
+    try {
+      if (editId !== null) {
+        await updateExpense(editId, {
+          title,
+          amount: Number(amount),
+          category,
+        });
+      } else {
+        await addExpense({
+          title,
+          amount: Number(amount),
+          category,
+        });
+      }
 
-    resetForm();
-    fetchExpenses();
+      resetForm();
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // 🔹 Reset form
   const resetForm = () => {
     setTitle("");
     setAmount("");
@@ -53,6 +65,7 @@ const App: React.FC = () => {
     setEditId(null);
   };
 
+  // 🔹 Edit
   const handleEdit = (exp: Expense) => {
     setTitle(exp.title);
     setAmount(String(exp.amount));
@@ -60,16 +73,21 @@ const App: React.FC = () => {
     setEditId(exp.id!);
   };
 
+  // 🔹 Delete
   const handleDelete = async (id: number) => {
-    await deleteExpense(id);
-    fetchExpenses();
+    try {
+      await deleteExpense(id);
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-200 flex items-center justify-center p-6">
       <div className="w-full max-w-2xl">
 
-        {/* 🔥 TOP INPUT CARD */}
+        {/* 🔥 INPUT CARD */}
         <div className="bg-green-400 p-6 rounded-xl mb-6 shadow-md">
           <div className="grid grid-cols-3 gap-3 mb-4">
             <input
@@ -94,51 +112,64 @@ const App: React.FC = () => {
             />
           </div>
 
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-black text-white py-3 rounded-lg"
-          >
-            {editId ? "Update Expense" : "Add Expense"}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-black text-white py-3 rounded-lg"
+            >
+              {editId ? "Update Expense" : "Add Expense"}
+            </button>
+
+            {editId && (
+              <button
+                onClick={resetForm}
+                className="w-full bg-gray-500 text-white py-3 rounded-lg"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
 
         {/* 🔥 EXPENSE LIST */}
         <div className="space-y-4">
-          {expenses.map((e) => (
-            <div
-              key={e.id}
-              className="bg-white p-5 rounded-xl shadow flex justify-between items-center"
-            >
-              {/* TEXT */}
-              <div>
-                <h3 className="font-semibold text-lg">{e.title}</h3>
-                <p className="text-gray-500">{e.category}</p>
+          {expenses.length === 0 ? (
+            <p className="text-center text-gray-600">No expenses yet 🚀</p>
+          ) : (
+            expenses.map((e) => (
+              <div
+                key={e.id}
+                className="bg-white p-5 rounded-xl shadow flex justify-between items-center"
+              >
+                {/* LEFT */}
+                <div>
+                  <h3 className="font-semibold text-lg">{e.title}</h3>
+                  <p className="text-gray-500">{e.category}</p>
+                </div>
+
+                {/* RIGHT */}
+                <div className="flex items-center gap-5">
+                  <span className="font-bold text-lg">₹{e.amount}</span>
+
+                  {/* EDIT ICON */}
+                  <button
+                    onClick={() => handleEdit(e)}
+                    className="text-gray-500 hover:text-blue-500 active:scale-90 transition"
+                  >
+                    <FaEdit size={18} />
+                  </button>
+
+                  {/* DELETE ICON */}
+                  <button
+                    onClick={() => handleDelete(e.id!)}
+                    className="text-gray-500 hover:text-red-500 active:scale-90 transition"
+                  >
+                    <FaTrash size={18} />
+                  </button>
+                </div>
               </div>
-
-              {/* RIGHT SIDE */}
-              <div className="flex items-center gap-4">
-
-                <span className="font-bold text-lg">₹{e.amount}</span>
-
-                {/* 🔵 EDIT BUTTON (CIRCLE) */}
-                <button
-                  onClick={() => handleEdit(e)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600"
-                >
-                  ✏️
-                </button>
-
-                {/* 🔴 DELETE BUTTON (CIRCLE) */}
-                <button
-                  onClick={() => handleDelete(e.id!)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
-                >
-                  🗑
-                </button>
-
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
       </div>
