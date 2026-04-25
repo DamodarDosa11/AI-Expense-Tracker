@@ -11,18 +11,13 @@ const App: React.FC = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  // 🔹 Fetch expenses
   const fetchExpenses = async () => {
     try {
-      setLoading(true);
       const data = await getExpenses();
       setExpenses(data);
     } catch (err) {
-      console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
+      console.error(err);
     }
   };
 
@@ -30,7 +25,6 @@ const App: React.FC = () => {
     fetchExpenses();
   }, []);
 
-  // 🔹 Add expense
   const handleAdd = async () => {
     if (!title || !amount || !category) {
       alert("All fields required");
@@ -50,151 +44,95 @@ const App: React.FC = () => {
 
       fetchExpenses();
     } catch (err) {
-      console.error("Add error:", err);
+      console.error(err);
     }
   };
 
-  // 🔹 Delete expense
   const handleDelete = async (id: number) => {
     try {
       await deleteExpense(id);
       fetchExpenses();
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error(err);
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0f172a",
-        color: "white",
-        padding: "30px",
-        fontFamily: "Arial",
-      }}
-    >
-      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
-        💰 Expense Tracker
-      </h1>
+    <div className="min-h-screen bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-4">
+      
+      <div className="w-full max-w-2xl">
+        
+        <h1 className="text-3xl font-bold text-white text-center mb-6">
+          💸 Expense Tracker
+        </h1>
 
-      {/* 🔹 Form */}
-      <div
-        style={{
-          maxWidth: "700px",
-          margin: "0 auto",
-          background: "#1e293b",
-          padding: "20px",
-          borderRadius: "12px",
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
-        <input
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={inputStyle}
-        />
+        {/* 🔥 INPUT CARD */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <input
+              className="border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
 
-        <input
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          style={inputStyle}
-        />
+            <input
+              className="border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
 
-        <input
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          style={inputStyle}
-        />
+            <input
+              className="border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+              placeholder="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            />
+          </div>
 
-        <button onClick={handleAdd} style={buttonStyle}>
-          Add Expense
-        </button>
-      </div>
+          <button
+            onClick={handleAdd}
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition"
+          >
+            Add Expense
+          </button>
+        </div>
 
-      {/* 🔹 List */}
-      <div
-        style={{
-          maxWidth: "700px",
-          margin: "30px auto",
-          background: "#1e293b",
-          padding: "20px",
-          borderRadius: "12px",
-        }}
-      >
-        <h3 style={{ marginBottom: "15px" }}>📋 Expenses</h3>
-
-        {loading ? (
-          <p>Loading...</p>
-        ) : expenses.length === 0 ? (
-          <p>No expenses yet 🚀</p>
-        ) : (
-          expenses.map((exp) => (
-            <div
-              key={exp.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                background: "#334155",
-                padding: "10px",
-                borderRadius: "8px",
-                marginBottom: "10px",
-              }}
-            >
-              <div>
-                <strong>{exp.title}</strong> — ₹{exp.amount}
-                <br />
-                <small style={{ color: "#cbd5f5" }}>{exp.category}</small>
-              </div>
-
-              <button
-                onClick={() => handleDelete(exp.id!)}
-                style={deleteStyle}
+        {/* 🔥 EXPENSE LIST */}
+        <div className="mt-6 space-y-3">
+          {expenses.length === 0 ? (
+            <p className="text-white text-center">No expenses yet 🚀</p>
+          ) : (
+            expenses.map((exp) => (
+              <div
+                key={exp.id}
+                className="bg-white p-4 rounded-xl shadow-md flex justify-between items-center"
               >
-                ❌
-              </button>
-            </div>
-          ))
-        )}
+                <div>
+                  <h3 className="font-semibold text-lg">{exp.title}</h3>
+                  <p className="text-gray-500 text-sm">{exp.category}</p>
+                </div>
+
+                <div className="text-right">
+                  <h3 className="font-bold text-lg">₹{exp.amount}</h3>
+                  <button
+                    onClick={() => handleDelete(exp.id!)}
+                    className="text-red-500 text-sm mt-1 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
       </div>
     </div>
   );
 };
 
 export default App;
-
-//
-// 🔹 Styles
-//
-
-const inputStyle: React.CSSProperties = {
-  padding: "10px",
-  borderRadius: "6px",
-  border: "none",
-  outline: "none",
-  minWidth: "120px",
-};
-
-const buttonStyle: React.CSSProperties = {
-  background: "#3b82f6",
-  color: "white",
-  border: "none",
-  padding: "10px 15px",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
-
-const deleteStyle: React.CSSProperties = {
-  background: "#ef4444",
-  border: "none",
-  color: "white",
-  padding: "5px 10px",
-  borderRadius: "6px",
-  cursor: "pointer",
-};
