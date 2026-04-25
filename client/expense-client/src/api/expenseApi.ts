@@ -7,13 +7,15 @@ export interface Expense {
   category: string;
 }
 
+// 🔹 GET
 export const getExpenses = async (): Promise<Expense[]> => {
   const res = await fetch(`${BASE_URL}/expenses`);
-  if (!res.ok) throw new Error("Fetch failed");
+  if (!res.ok) throw new Error("Failed to fetch expenses");
   return res.json();
 };
 
-export const addExpense = async (data: Expense) => {
+// 🔹 ADD
+export const addExpense = async (data: Expense): Promise<Expense> => {
   const res = await fetch(`${BASE_URL}/expenses`, {
     method: "POST",
     headers: {
@@ -22,12 +24,32 @@ export const addExpense = async (data: Expense) => {
     body: JSON.stringify(data),
   });
 
-  if (!res.ok) throw new Error("Add failed");
+  if (!res.ok) throw new Error("Failed to add expense");
   return res.json();
 };
 
-export const deleteExpense = async (id: number) => {
-  await fetch(`${BASE_URL}/expenses/${id}`, {
+// 🔹 DELETE
+export const deleteExpense = async (id: number): Promise<void> => {
+  const res = await fetch(`${BASE_URL}/expenses/${id}`, {
     method: "DELETE",
   });
+
+  if (!res.ok) throw new Error("Failed to delete expense");
+};
+
+// 🔥 🔹 UPDATE (THIS WAS MISSING)
+export const updateExpense = async (
+  id: number,
+  data: Expense
+): Promise<Expense> => {
+  const res = await fetch(`${BASE_URL}/expenses/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) throw new Error("Failed to update expense");
+  return res.json();
 };
