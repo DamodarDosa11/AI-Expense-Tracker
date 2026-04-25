@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import type {
+
+// ✅ NORMAL IMPORT (IMPORTANT)
+import {
   getExpenses,
   addExpense,
   deleteExpense,
-  Expense,
 } from "./api/expenseApi";
+
+// ✅ TYPE IMPORT (SEPARATE)
+import type { Expense } from "./api/expenseApi";
 
 const App: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -26,10 +30,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleAdd = async () => {
-    if (!title || !amount || !category) {
-      alert("All fields required");
-      return;
-    }
+    if (!title || !amount || !category) return;
 
     try {
       await addExpense({
@@ -58,35 +59,32 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-4">
-      
-      <div className="w-full max-w-2xl">
-        
-        <h1 className="text-3xl font-bold text-white text-center mb-6">
-          💸 Expense Tracker
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-500 to-purple-600 p-5">
+      <div className="w-full max-w-xl">
+
+        <h1 className="text-white text-3xl font-bold text-center mb-6">
+          Expense Tracker
         </h1>
 
-        {/* 🔥 INPUT CARD */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 space-y-4">
+        <div className="bg-white p-6 rounded-xl shadow-xl">
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
+          <div className="grid md:grid-cols-3 gap-3 mb-4">
             <input
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="border p-3 rounded"
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
 
             <input
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="border p-3 rounded"
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
 
             <input
-              className="border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
+              className="border p-3 rounded"
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -95,39 +93,34 @@ const App: React.FC = () => {
 
           <button
             onClick={handleAdd}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition"
+            className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700"
           >
             Add Expense
           </button>
         </div>
 
-        {/* 🔥 EXPENSE LIST */}
         <div className="mt-6 space-y-3">
-          {expenses.length === 0 ? (
-            <p className="text-white text-center">No expenses yet 🚀</p>
-          ) : (
-            expenses.map((exp) => (
-              <div
-                key={exp.id}
-                className="bg-white p-4 rounded-xl shadow-md flex justify-between items-center"
-              >
-                <div>
-                  <h3 className="font-semibold text-lg">{exp.title}</h3>
-                  <p className="text-gray-500 text-sm">{exp.category}</p>
-                </div>
-
-                <div className="text-right">
-                  <h3 className="font-bold text-lg">₹{exp.amount}</h3>
-                  <button
-                    onClick={() => handleDelete(exp.id!)}
-                    className="text-red-500 text-sm mt-1 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </div>
+          {expenses.map((e) => (
+            <div
+              key={e.id}
+              className="bg-white p-4 rounded-lg shadow flex justify-between"
+            >
+              <div>
+                <h3 className="font-bold">{e.title}</h3>
+                <p className="text-gray-500 text-sm">{e.category}</p>
               </div>
-            ))
-          )}
+
+              <div className="text-right">
+                <h3 className="font-bold">₹{e.amount}</h3>
+                <button
+                  onClick={() => handleDelete(e.id!)}
+                  className="text-red-500 text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
       </div>
