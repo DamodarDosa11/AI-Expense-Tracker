@@ -6,13 +6,7 @@ const cors = require("cors");
 const app = express();
 
 // ✅ Production CORS (only your frontend domain)
-app.use(
-  cors({
-    origin: "https://ai-expense-tracker-chi.vercel.app",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
+app.use(cors());
 
 // ✅ Body parser (CRITICAL — this was your issue)
 app.use(express.json());
