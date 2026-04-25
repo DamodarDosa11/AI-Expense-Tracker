@@ -9,6 +9,17 @@ import type { Expense } from "./api/expenseApi";
 
 import { FaEdit, FaTrash } from "react-icons/fa";
 
+// 🔥 Charts
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#3b82f6"];
+
 const App: React.FC = () => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -65,107 +76,136 @@ const App: React.FC = () => {
     fetchExpenses();
   };
 
-  return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl">
+  // 🔥 GROUP BY CATEGORY
+  const grouped = expenses.reduce((acc: any, exp) => {
+    if (!acc[exp.category]) acc[exp.category] = [];
+    acc[exp.category].push(exp);
+    return acc;
+  }, {});
 
-        {/* 🔥 TITLE */}
-        <h1 className="text-3xl font-bold text-slate-800 text-center mb-6 tracking-wide">
+  return (
+    <div className="min-h-screen bg-slate-100 p-6">
+      <div className="max-w-5xl mx-auto">
+
+        {/* TITLE */}
+        <h1 className="text-3xl font-bold text-center mb-6 text-slate-800">
           EXPENSE TRACKER
         </h1>
 
-        {/* 🔥 INPUT CARD */}
-        <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-slate-200">
-          
-          <div className="grid grid-cols-3 gap-3 mb-4">
+        {/* INPUT CARD */}
+        <div className="bg-white p-6 rounded-xl shadow mb-6">
+          <div className="grid md:grid-cols-3 gap-3 mb-4">
             <input
-              className="p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="p-3 border rounded"
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-
             <input
-              className="p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="p-3 border rounded"
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
-
             <input
-              className="p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              className="p-3 border rounded"
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             />
           </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition"
-            >
-              {editId ? "Update Expense" : "Add Expense"}
-            </button>
-
-            {editId && (
-              <button
-                onClick={resetForm}
-                className="w-full bg-slate-400 text-white py-3 rounded-lg hover:bg-slate-500 transition"
-              >
-                Cancel
-              </button>
-            )}
-          </div>
+          <button
+            onClick={handleSubmit}
+            className="w-full bg-indigo-600 text-white py-3 rounded"
+          >
+            {editId ? "Update Expense" : "Add Expense"}
+          </button>
         </div>
 
-        {/* 🔥 EXPENSE LIST */}
-        <div className="space-y-4">
-          {expenses.length === 0 ? (
-            <p className="text-center text-slate-500">
-              No expenses yet 🚀
-            </p>
-          ) : (
-            expenses.map((e) => (
+        {/* 🔥 CATEGORY TILES */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {Object.keys(grouped).map((cat, index) => {
+            const data = grouped[cat];
+
+            const chartData = data.map((e: Expense) => ({
+              name: e.title,
+              value: e.amount,
+            }));
+
+            const total = data.reduce(
+              (sum: number, e: Expense) => sum + e.amount,
+              0
+            );
+
+            return (
               <div
-                key={e.id}
-                className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center"
+                key={cat}
+                className="bg-white p-5 rounded-xl shadow"
               >
-                {/* LEFT */}
-                <div>
-                  <h3 className="font-semibold text-slate-800 text-lg">
-                    {e.title}
-                  </h3>
-                  <p className="text-slate-500 text-sm">
-                    {e.category}
-                  </p>
+                {/* CATEGORY HEADER */}
+                <h2 className="text-xl font-semibold mb-2 text-indigo-600">
+                  {cat}
+                </h2>
+
+                <p className="mb-3 text-sm text-slate-500">
+                  Total: ₹{total}
+                </p>
+
+                {/* 🔥 PIE CHART */}
+                <div className="w-full h-48">
+                  <ResponsiveContainer>
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        dataKey="value"
+                        outerRadius={70}
+                      >
+                        {chartData.map((_, i) => (
+                          <Cell
+                            key={i}
+                            fill={COLORS[i % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
 
-                {/* RIGHT */}
-                <div className="flex items-center gap-5">
-                  <span className="font-bold text-slate-700 text-lg">
-                    ₹{e.amount}
-                  </span>
+                {/* 🔥 LIST */}
+                <div className="mt-3 space-y-2">
+                  {data.map((e: Expense) => (
+                    <div
+                      key={e.id}
+                      className="flex justify-between items-center text-sm"
+                    >
+                      <span>{e.title}</span>
 
-                  {/* EDIT */}
-                  <button
-                    onClick={() => handleEdit(e)}
-                    className="text-slate-400 hover:text-indigo-600 active:scale-90 transition"
-                  >
-                    <FaEdit size={18} />
-                  </button>
+                      <div className="flex items-center gap-3">
+                        <span>₹{e.amount}</span>
 
-                  {/* DELETE */}
-                  <button
-                    onClick={() => handleDelete(e.id!)}
-                    className="text-slate-400 hover:text-red-500 active:scale-90 transition"
-                  >
-                    <FaTrash size={18} />
-                  </button>
+                        <button
+                          onClick={() => handleEdit(e)}
+                          className="text-gray-400 hover:text-blue-500"
+                        >
+                          <FaEdit />
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(e.id!)}
+                          className="text-gray-400 hover:text-red-500"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+
               </div>
-            ))
-          )}
+            );
+          })}
         </div>
 
       </div>
