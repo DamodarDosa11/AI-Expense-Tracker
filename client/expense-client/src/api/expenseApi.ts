@@ -1,19 +1,21 @@
-const BASE_URL = "https://expense-backendi.onrender.com"; // 🔥 EXACT URL
+const BASE_URL = "https://expense-backendi.onrender.com";
 
 // ✅ GET
 export const getExpenses = async () => {
   const res = await fetch(`${BASE_URL}/expenses`);
-  if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 };
 
-// ✅ ADD (FIXED — NO extra headers)
+// ✅ ADD (FIXED)
 export const addExpense = async (data: any) => {
   const res = await fetch(`${BASE_URL}/expenses`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json", // ✅ BACK AGAIN
+    },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Failed to add");
+
   return res.json();
 };
 
@@ -29,7 +31,11 @@ export const deleteExpense = async (id: number) => {
 export const updateExpense = async (id: number, data: any) => {
   const res = await fetch(`${BASE_URL}/expenses/${id}`, {
     method: "PUT",
+    headers: {
+      "Content-Type": "application/json", // ✅ BACK AGAIN
+    },
     body: JSON.stringify(data),
   });
+
   return res.json();
 };
