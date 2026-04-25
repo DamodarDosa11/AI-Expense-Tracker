@@ -8,9 +8,9 @@ const {
   updateExpense,
 } = require("../controllers/expenseController");
 
-router.get("/expenses", getExpenses);
-router.post("/expenses", addExpense);
-router.delete("/expenses/:id", deleteExpense);
-router.put("/expenses/:id", updateExpense);
+router.get("/", getExpenses);
+router.post("/", addExpense);
+router.delete("/:id", deleteExpense);
+router.put("/:id", updateExpense);
 
 module.exports = router;

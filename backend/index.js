@@ -1,31 +1,39 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
+
 const app = express();
 
-// ✅ GLOBAL CORS + PREFLIGHT (FINAL)
+// ✅ Production CORS (only your frontend domain)
+app.use(
+  cors({
+    origin: "https://ai-expense-tracker-chi.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
+  })
+);
+
+// ✅ Body parser (CRITICAL — this was your issue)
+app.use(express.json());
+
+// ✅ Debug (REMOVE after testing)
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
+  console.log("Incoming:", req.method, req.url);
+  console.log("Body:", req.body);
   next();
 });
 
-app.use(express.json());
-
 // ✅ Routes
 const expenseRoutes = require("./routes/expenseRoutes");
-app.use("/", expenseRoutes);
+app.use("/expenses", expenseRoutes);
 
-// ✅ Health
+// Health check
 app.get("/", (req, res) => {
   res.send("API running 🚀");
 });
 
 const PORT = process.env.PORT || 4001;
-app.listen(PORT, () => console.log(`Server on ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

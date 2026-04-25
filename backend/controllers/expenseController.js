@@ -3,7 +3,9 @@ const pool = require("../db");
 // ✅ GET
 const getExpenses = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM expenses ORDER BY id DESC");
+    const result = await pool.query(
+      "SELECT * FROM expenses ORDER BY id DESC"
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -11,12 +13,17 @@ const getExpenses = async (req, res) => {
   }
 };
 
-// ✅ ADD
+// ✅ ADD (STRICT VALIDATION)
 const addExpense = async (req, res) => {
   try {
-    console.log("BODY:", req.body); // DEBUG
-
     const { title, amount, category } = req.body;
+
+    // 🔥 Prevent NULL inserts
+    if (!title || !amount || !category) {
+      return res.status(400).json({
+        error: "All fields are required",
+      });
+    }
 
     const result = await pool.query(
       "INSERT INTO expenses (title, amount, category) VALUES ($1, $2, $3) RETURNING *",
@@ -34,7 +41,7 @@ const addExpense = async (req, res) => {
 const deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query("DELETE FROM expenses WHERE id = $1", [id]);
+    await pool.query("DELETE FROM expenses WHERE id=$1", [id]);
     res.json({ message: "Deleted" });
   } catch (err) {
     console.error(err);

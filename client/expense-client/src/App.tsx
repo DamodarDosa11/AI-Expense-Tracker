@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-// ✅ Correct imports
 import {
   getExpenses,
   addExpense,
   deleteExpense,
 } from "./api/expenseApi";
 
-// ✅ Type import separately
 import type { Expense } from "./api/expenseApi";
 
 const App: React.FC = () => {
@@ -16,7 +14,6 @@ const App: React.FC = () => {
   const [category, setCategory] = useState<string>("");
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
-  // 🔹 Fetch all expenses
   const fetchData = async () => {
     try {
       const data = await getExpenses();
@@ -30,7 +27,6 @@ const App: React.FC = () => {
     fetchData();
   }, []);
 
-  // 🔹 Add expense
   const handleAdd = async () => {
     if (!title || !amount || !category) {
       alert("All fields required");
@@ -40,11 +36,10 @@ const App: React.FC = () => {
     try {
       await addExpense({
         title,
-        amount: Number(amount), // ✅ important
+        amount: Number(amount),
         category,
       });
 
-      // reset fields
       setTitle("");
       setAmount("");
       setCategory("");
@@ -55,7 +50,6 @@ const App: React.FC = () => {
     }
   };
 
-  // 🔹 Delete expense
   const handleDelete = async (id: number) => {
     try {
       await deleteExpense(id);
@@ -66,7 +60,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: 20 }}>
       <h2>Expense Tracker</h2>
 
       <input
