@@ -25,7 +25,6 @@ const App: React.FC = () => {
     fetchExpenses();
   }, []);
 
-  // 🔥 ADD / UPDATE
   const handleSubmit = async () => {
     if (!title || !amount || !category) return;
 
@@ -35,7 +34,6 @@ const App: React.FC = () => {
         amount: Number(amount),
         category,
       });
-      setEditId(null);
     } else {
       await addExpense({
         title,
@@ -48,7 +46,6 @@ const App: React.FC = () => {
     fetchExpenses();
   };
 
-  // 🔥 RESET FORM
   const resetForm = () => {
     setTitle("");
     setAmount("");
@@ -56,7 +53,6 @@ const App: React.FC = () => {
     setEditId(null);
   };
 
-  // 🔥 EDIT CLICK
   const handleEdit = (exp: Expense) => {
     setTitle(exp.title);
     setAmount(String(exp.amount));
@@ -70,96 +66,76 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-500 to-purple-600 p-5">
-      <div className="w-full max-w-xl">
+    <div className="min-h-screen bg-gray-200 flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl">
 
-        <h1 className="text-white text-3xl font-bold text-center mb-6">
-          Expense Tracker
-        </h1>
-
-        {/* 🔥 FORM */}
-        <div className="bg-white p-6 rounded-xl shadow-xl">
-          
-          {editId !== null && (
-            <p className="text-blue-600 mb-3 text-sm font-semibold">
-              Editing Expense ✏️
-            </p>
-          )}
-
-          <div className="grid md:grid-cols-3 gap-3 mb-4">
+        {/* 🔥 TOP INPUT CARD */}
+        <div className="bg-green-400 p-6 rounded-xl mb-6 shadow-md">
+          <div className="grid grid-cols-3 gap-3 mb-4">
             <input
-              className="border p-3 rounded"
+              className="p-3 rounded bg-white"
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
 
             <input
-              className="border p-3 rounded"
+              className="p-3 rounded bg-white"
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
 
             <input
-              className="border p-3 rounded"
+              className="p-3 rounded bg-white"
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             />
           </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleSubmit}
-              className={`w-full py-3 rounded text-white ${
-                editId !== null
-                  ? "bg-yellow-500 hover:bg-yellow-600"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              {editId !== null ? "Update Expense" : "Add Expense"}
-            </button>
-
-            {editId !== null && (
-              <button
-                onClick={resetForm}
-                className="w-full bg-gray-400 text-white py-3 rounded hover:bg-gray-500"
-              >
-                Cancel
-              </button>
-            )}
-          </div>
+          <button
+            onClick={handleSubmit}
+            className="w-full bg-black text-white py-3 rounded-lg"
+          >
+            {editId ? "Update Expense" : "Add Expense"}
+          </button>
         </div>
 
-        {/* 🔥 LIST */}
-        <div className="mt-6 space-y-3">
+        {/* 🔥 EXPENSE LIST */}
+        <div className="space-y-4">
           {expenses.map((e) => (
             <div
               key={e.id}
-              className="bg-white p-4 rounded-lg shadow flex justify-between items-center"
+              className="bg-white p-5 rounded-xl shadow flex justify-between items-center"
             >
+              {/* TEXT */}
               <div>
-                <h3 className="font-bold">{e.title}</h3>
-                <p className="text-gray-500 text-sm">{e.category}</p>
+                <h3 className="font-semibold text-lg">{e.title}</h3>
+                <p className="text-gray-500">{e.category}</p>
               </div>
 
-              <div className="text-right space-x-3">
-                <span className="font-bold block">₹{e.amount}</span>
+              {/* RIGHT SIDE */}
+              <div className="flex items-center gap-4">
 
+                <span className="font-bold text-lg">₹{e.amount}</span>
+
+                {/* 🔵 EDIT BUTTON (CIRCLE) */}
                 <button
                   onClick={() => handleEdit(e)}
-                  className="text-blue-500 text-sm"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600"
                 >
-                  Edit
+                  ✏️
                 </button>
 
+                {/* 🔴 DELETE BUTTON (CIRCLE) */}
                 <button
                   onClick={() => handleDelete(e.id!)}
-                  className="text-red-500 text-sm"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
                 >
-                  Delete
+                  🗑
                 </button>
+
               </div>
             </div>
           ))}
